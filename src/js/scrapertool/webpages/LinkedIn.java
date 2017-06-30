@@ -1,91 +1,19 @@
 package js.scrapertool.webpages;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 /*
- * This class is the engine for the TTL Scraper Tool
- * It is capable of going through ~150 companies in an hour
- * At the end, it compiles a list which can be copied into a spreadsheet
- * Accuracy TBD
+ * Description: This class defines custom methods for the LinkedIn scraper module
  * 
  * Author: Jaret Stillman (jrsstill@umich.edu)
- * Version: 1.0
- * Date: 6/29/17
+ * Version: 1.1
+ * Date: 6/30/17
  */
-public class LinkedIn implements WebPage
+public class LinkedIn extends WebPage
 {
-	PhantomJSDriver driver;
-
-	public static void main(String[] args)
-	{
-
-		String[] tags = { "p[class*='org-about-company-module__founded']",
-				"p[class*='org-about-company-module__headquarters']",
-				"p[class*='org-about-company-module__company-staff-count-range']" };
-		
-		String email = "jrsstill@umich.edu";
-		String password = "My Password";
-		String csvFile = "database_companies_export.csv";
-		
-		run(tags, email, password,csvFile);
-	}
-	
-	public static void run(String[] tags, String email, String password, String csvFile)
-	{
-
-		// Setup driver, login to LinkedIn
-		Main m = new Main();
-
-		// Prevent Log Messages from showing up in console, login
-		System.setProperty("phantomjs.binary.path",
-				"C:/Users/jrsti/Documents/Java/phantomjs-2.1.1-windows/phantomjs-2.1.1-windows/bin/phantomjs.exe");
-		DesiredCapabilities dcap = new DesiredCapabilities();
-		String[] phantomArgs = new String[] { "--webdriver-loglevel=NONE" };
-		dcap.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, phantomArgs);
-		m.login(email, password, dcap);
-
-		// Import CSV File
-		ArrayList<String> companies = m.readCSV(csvFile);
-
-		// This is an String ArrayList for each category (contained in tags[])
-		// i.e. cmp[0] will be for all the dates founded, cmp[1] will be for all
-		// the headquarters, cmp[2] will be for all the employeeNumbers, etc.
-		ArrayList<ArrayList<String>> cmp = new ArrayList<ArrayList<String>>();
-		for (int i = 0; i < tags.length; i++)
-		{
-			cmp.add(new ArrayList<String>());
-		}
-
-
-		// Iterate through companies, compile data
-		for (String company : companies)
-		{
-			System.out.println(company + " ");
-			String link = m.getLink(company);
-			if (link == "NO_LINK")
-			{
-				System.out.println("No Link Found");
-			} 
-			else
-			{
-				System.out.println(link);
-				m.getData(link, company, tags, cmp);
-			}
-			System.out.println("Added\n\n");
-		}
-
-		// Print data
-		m.print(cmp);
-	}
 
 	/*
 	 * Logs in to LinkedIn 
@@ -93,13 +21,9 @@ public class LinkedIn implements WebPage
 	 * MODIFIES: driver 
 	 * EFFECTS: Adds login cookies to driver
 	 */
-	public void login(String e, String p, DesiredCapabilities dcap)
+	public void login(String e, String p)
 	{
 		String url = "https://www.linkedin.com";
-
-		// Initialize Driver
-		driver = new PhantomJSDriver(dcap);
-
 		// Go to login page, enter email and password
 		driver.get(url);
 		WebElement email = driver.findElement(By.cssSelector("input[id='login-email']"));
@@ -120,46 +44,6 @@ public class LinkedIn implements WebPage
 		}
 		
 		System.out.println("\n\nLogin for " + e + " successful");
-	}
-
-	/*
-	 * Read in CSV File from "filename.csv" 
-	 * Format: Company, xxx, xxx... (headers) 
-	 * Company_name1, info1a, info1b... 
-	 * Company_name2, info2a, info2b...
-	 * 
-	 * REQUIRES: filename leads to a valid CSV file of correct format (see above) 
-	 * EFFECTS: Returns an ArrayList<String> of company names from CSV column 1
-	 */
-	public ArrayList<String> readCSV(String fileName)
-	{
-		String line = "";
-		String csvSplitBy = ",";
-		ArrayList<String> companies = new ArrayList<String>();
-		int i = 0;
-		try (BufferedReader br = new BufferedReader(new FileReader(fileName)))
-		{
-			while ((line = br.readLine()) != null)
-			{
-				// skip the first line
-				if (i == 0)
-				{
-					++i;
-					continue;
-				}
-				// use comma as separator
-				String[] row = line.split(csvSplitBy);
-				companies.add(row[0]);
-			}
-		} 
-		catch (IOException e)
-		{
-			System.out.println("Import of " + fileName + " failed");
-			System.exit(0);
-		}
-		
-		System.out.println(fileName + " succesfully imported\n\n");
-		return companies;
 	}
 
 	/*
@@ -236,32 +120,4 @@ public class LinkedIn implements WebPage
 		}
 	}
 
-	// PRINT PACKAGE
-	public void print(ArrayList<ArrayList<String>> cmp)
-	{
-		for (ArrayList<String> tag : cmp)
-		{
-			for (String s : tag)
-			{
-				System.out.println(s);
-			}
-			System.out.println("\n\n");
-		}
-	}
-
-	// Helper function for waiting for page to load
-	// REQUIRES: numSecs>=0
-	// EFFECTS: Sleeps thread for numSecs
-	private void wait(double numSecs)
-	{
-		try
-		{
-			Thread.sleep((int) numSecs * 1000);
-		} 
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
 }
