@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import js.scrapertool.exceptions.InvalidCredentialsException;
+
 /*
  * Description: This class defines custom methods for the LinkedIn scraper module
  * 
@@ -21,7 +23,7 @@ public class LinkedIn extends WebPage
 	 * MODIFIES: driver 
 	 * EFFECTS: Adds login cookies to driver
 	 */
-	public void login(String e, String p)
+	public void login(String e, String p) throws InvalidCredentialsException
 	{
 		String url = "https://www.linkedin.com";
 		// Go to login page, enter email and password
@@ -40,7 +42,7 @@ public class LinkedIn extends WebPage
 		if (!driver.getCurrentUrl().equals("https://www.linkedin.com/feed/"))
 		{
 			System.out.println("Invalid Credentials: Login for " + e + " Not Successful");
-			System.exit(0);
+			throw new InvalidCredentialsException("Invalid Credentials: Login for " + e + " Unsuccessful");
 		}
 		
 		System.out.println("\n\nLogin for " + e + " successful");
@@ -51,7 +53,7 @@ public class LinkedIn extends WebPage
 	 * MODIFIES: driver 
 	 * EFFECTS: Returns a link to the first search result under the "Companies" tab
 	 */
-	public String getLink(String search)
+	public String getLink(String search, String type)
 	{
 		try
 		{
@@ -109,12 +111,14 @@ public class LinkedIn extends WebPage
 			try
 			{
 				e1 = driver.findElement(By.cssSelector(tags[i]));
+				System.out.println(tags[i] + " found");
 				cmp.get(i).add(e1.getAttribute("innerHTML").trim());
 			}
 
 			// LinkedIn Page doesn't contain that tag
 			catch (NoSuchElementException e)
 			{
+				System.out.println(tags[i] + " not found");
 				cmp.get(i).add(" ");
 			}
 		}

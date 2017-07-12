@@ -6,6 +6,8 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import js.scrapertool.exceptions.InvalidCredentialsException;
+
 
 /*
  * Description: This class defines the global vars and abstract methods for each WebPage module (LinkedIn, Crunchbase, Facebook, etc.)
@@ -17,8 +19,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 public abstract class WebPage
 {
 	PhantomJSDriver driver;
-	public abstract void login(String e, String p);
-	public abstract String getLink(String search);
+	public abstract void login(String e, String p) throws InvalidCredentialsException;
+	public abstract String getLink(String search, String type);
 	public abstract void getData(String link, String company, String[] tags, ArrayList<ArrayList<String>> cmp);
 	
 	public WebPage()
