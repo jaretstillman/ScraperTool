@@ -17,20 +17,25 @@ import js.scrapertool.gui.windows.RunData;
 import js.scrapertool.gui.windows.Start;
 import js.scrapertool.gui.windows.Windows;
 import js.scrapertool.main.Main;
+import js.scrapertool.gui.windows.Display;
 import js.scrapertool.gui.windows.Import;
 
+/*
+* ScraperTool .main() Class
+* Description: This class initiates the GUI and manages the entire app
+* External Libraries/Resources used: Selenium/PhantomJS, WindowBuilder
+* Data: public from LinkedIn
+* 
+* Author: Jaret Stillman (jrsstill@umich.edu)
+* Version: 2.0
+* Date: 7/14/17
+*/
 public class GUI extends Frame
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
-	private String email;
-	private String password;
 	private String site;
-	private String csvFile;
 	private String type;
 	private String[] tags;
 
@@ -54,18 +59,23 @@ public class GUI extends Frame
 		setLayout(new BorderLayout());
 		setBounds(100, 100, 1200, 600);
 	    setLocation(this.dim.width / 2 - getSize().width / 2, this.dim.height / 2 - getSize().height / 2);
-        addWindowListener( new WindowAdapter() {
+        addWindowListener( new WindowAdapter() 
+        {
             @Override
-            public void windowClosing(WindowEvent we) {
+            public void windowClosing(WindowEvent we) 
+            {
                 System.exit(0);
             }
         } );
         setVisible(true);
-        site = "LinkedIn";
-        type = "Companies";
-		switchScreen("Login");
+		switchScreen("Start");
 	}
 	
+	/*
+	 * REQUIRES: screen is a valid "next window"
+	 * MODIFIES: this
+	 * EFFECTS: Handles switches between windows, waits until windows are ready to be updated
+	 */
 	private void switchScreen(String screen)
 	{	
 		Windows currentWindow = null;
@@ -83,7 +93,7 @@ public class GUI extends Frame
 				currentWindow = new Login(site,main,this);
 				break;
 			case "Import":
-				currentWindow = new Import(main);
+				currentWindow = new Import(main,type);
 				break;
 			case "PickData":
 				currentWindow = new PickData(site,type);
@@ -91,10 +101,9 @@ public class GUI extends Frame
 			case "Run":
 				currentWindow = new RunData(main,site,type,tags);
 				break;
-				/*
 			case "Display":
-				currentWindow = new DisplayData();
-				break;*/
+				currentWindow = new Display(main,tags,type);
+				break; 
 				
 			default:
 				System.out.println("Not a valid screen");
@@ -108,6 +117,11 @@ public class GUI extends Frame
 		switchScreen(currentWindow.getNext());
 	}
 	
+	/*
+	 * REQUIRES: s is a valid window
+	 * MODIFIES: site, type, tags
+	 * EFFECTS: sets global vars based on returns from window programs finishing
+	 */
 	private void extractInfo(String s, ArrayList<String> info)
 	{
 		switch (s)
@@ -118,24 +132,8 @@ public class GUI extends Frame
 				site = info.get(0);
 				type = info.get(1);
 				break;
-			case "Login":
-				email = info.get(0);
-				password = info.get(1);
-				break;
-				
-			case "Import":
-				/*if(info.get(0)!=null)
-				{
-					csvFile = info.get(0);
-				}*/
-				break;
-				
 			case "PickData":
 				tags = info.toArray(new String[info.size()]);
-				break;
-			case "Run":
-				break;
-			case "Display":
 				break;
 		}
 	}

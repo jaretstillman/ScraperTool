@@ -22,6 +22,12 @@ import javax.swing.SwingWorker;
 import js.scrapertool.exceptions.InvalidCredentialsException;
 import js.scrapertool.main.Main;
 
+/*
+ * Description: This class sets the UI for the "Login" window
+ * 
+ * Author: Jaret Stillman (jrsstill@umich.edu)
+ */
+
 public class Login extends Windows
 {
 	private JTextField textField;
@@ -52,6 +58,7 @@ public class Login extends Windows
 		textField = new JTextField();
 		textField.setForeground(Color.LIGHT_GRAY);
 		textField.setText("example@example.com");
+		
 		textField.addFocusListener(new FocusAdapter()
 		{
 			boolean modified=false;
@@ -66,7 +73,9 @@ public class Login extends Windows
 				}
 			}
 		});
+		
 		textField.setFocusTraversalKeysEnabled(false);
+		
 		textField.addKeyListener(new KeyAdapter(){
 			public void keyPressed(KeyEvent e)
 			{
@@ -76,6 +85,7 @@ public class Login extends Windows
 				}
 			}
 		});
+		
 		textField.setFont(new Font("Arial", Font.PLAIN, 30));
 		textField.setColumns(10);
 		textField.setBounds(375, 200, 450, 65);
@@ -84,6 +94,7 @@ public class Login extends Windows
 		textField2 = new JPasswordField();
 		textField2.setForeground(Color.LIGHT_GRAY);
 		textField2.setText("password");
+		
 		textField2.addFocusListener(new FocusAdapter()
 		{
 			boolean modified=false;
@@ -98,6 +109,7 @@ public class Login extends Windows
 				}
 			}
 		});
+		
 		textField2.setFont(new Font("Arial", Font.PLAIN, 30));
 		textField2.setColumns(10);
 		textField2.setBounds(375, 285, 450, 65);
@@ -146,6 +158,8 @@ public class Login extends Windows
 						{
 							if(get())
 							{
+								lbl4.setText("Log-In for " + info.get(0) + "Successful!");
+								lbl4.setForeground(Color.GREEN);
 								//JOptionPane.showMessageDialog(panel, "Log in for user " + info.get(0) + " successful!");
 								next = "Import";
 							}
@@ -164,6 +178,7 @@ public class Login extends Windows
 				};
 				worker.execute();
 			}});
+		panel.add(btn1);
 		
 		textField2.addKeyListener(new KeyAdapter(){
 			public void keyPressed(KeyEvent e)
@@ -175,7 +190,8 @@ public class Login extends Windows
 			}
 		});
 		
-		panel.add(btn1);
+		addBackButton("PickSite");
+		
 	}
 
 }

@@ -14,13 +14,15 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
+/*
+ * Description: This class sets the UI for the "PickData" window
+ * 
+ * Author: Jaret Stillman (jrsstill@umich.edu)
+ */
+
 public class PickData extends Windows
 {
 
-	/**
-	 * Create the application.
-	 */
-	
 	public PickData(String site, String type)
 	{
 		DefaultListModel<String> tagOptions = new DefaultListModel<String>();
@@ -64,6 +66,8 @@ public class PickData extends Windows
 			}		
 		});
 		panel.add(btn1);
+		
+		addBackButton("Import");
 	}
 
 	private void getTagOptions(String site, String type, DefaultListModel<String> tagOptions)

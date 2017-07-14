@@ -7,12 +7,15 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
+/*
+ * Description: This class sets the UI for the "Start" window
+ * 
+ * Author: Jaret Stillman (jrsstill@umich.edu)
+ */
+
 public class Start extends Windows
 {
 
-	/**
-	 * Initialize the contents of the panel.
-	 */
 	public Start()
 	{
 		JLabel lbl1 = new JLabel("ScraperTool");
@@ -36,11 +39,13 @@ public class Start extends Windows
 		panel.add(lbl4);
 		
 		JButton btn1 = new JButton("PRESS TO START");
+		
 		btn1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				next="PickSite";
 			}
 		});
+		
 		btn1.setFont(new Font("Arial", Font.BOLD, 30));
 		btn1.setBounds(450,350,300,100);
 		panel.add(btn1);

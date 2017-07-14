@@ -11,9 +11,8 @@ import js.scrapertool.exceptions.InvalidCredentialsException;
  * Description: This class defines custom methods for the LinkedIn scraper module
  * 
  * Author: Jaret Stillman (jrsstill@umich.edu)
- * Version: 1.1
- * Date: 6/30/17
  */
+
 public class LinkedIn extends WebPage
 {
 
@@ -26,13 +25,14 @@ public class LinkedIn extends WebPage
 	public void login(String e, String p) throws InvalidCredentialsException
 	{
 		String url = "https://www.linkedin.com";
+		
 		// Go to login page, enter email and password
 		driver.get(url);
 		WebElement email = driver.findElement(By.cssSelector("input[id='login-email']"));
 		WebElement password = driver.findElement(By.cssSelector("input[id='login-password']"));
 		email.sendKeys(e);
 		password.sendKeys(p);
-
+		
 		// Click submit button
 		WebElement submit = driver.findElement(By.cssSelector("input[id='login-submit']"));
 		submit.click();
@@ -45,7 +45,7 @@ public class LinkedIn extends WebPage
 			throw new InvalidCredentialsException("Invalid Credentials: Login for " + e + " Unsuccessful");
 		}
 		
-		System.out.println("\n\nLogin for " + e + " successful");
+		System.out.println("\n\nLogin for " + e + " successful\n\n");
 	}
 
 	/*
@@ -60,43 +60,98 @@ public class LinkedIn extends WebPage
 			// Edit names that don't work in search
 			search.replaceAll(" ", "%20").replaceAll(",", "%2C"); // can add more, but these are most common, easier to fill in the rest
 			
-			driver.get("https://www.linkedin.com/search/results/companies/?keywords=" + search
-					+ "&origin=SWITCH_SEARCH_VERTICAL");
-
-			WebElement company = driver.findElement(By.cssSelector("a[data-control-name='search_srp_result']"));
-			String href = company.getAttribute("href");
+			try
+			{
+				driver.get("https://www.linkedin.com/search/results/" + type.toLowerCase() + "/?keywords=" + search
+						+ "&origin=SWITCH_SEARCH_VERTICAL");
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				System.exit(0);
+			}
+			
+			//Check if we are getting the right page from a search
+			WebElement firstResult = driver.findElement(By.cssSelector("a[data-control-name*='search_srp_result']"));
+			WebElement title = type=="Companies" ? driver.findElement(By.cssSelector("h3[class*='search-result__title']")) :
+									driver.findElement(By.cssSelector("span[class*='name actor-name']"));
+			
+			//If type = "People", check that the last name matches the search
+			//In future, consider adding "Nicknames" module to check first name as well
+			if(type.equals("People"))
+			{
+				String[] firstLast = new String[2];
+				firstLast = search.split("\\s",2); //split into first and last name
+				System.out.println(firstLast[0]);
+				System.out.println(firstLast[1]);
+				if(!trimWord(title.getAttribute("innerHTML")).contains(trimWord(firstLast[1])) && 
+						!trimWord(firstLast[1]).contains(title.getAttribute("innerHTML")))
+				{
+					System.out.println(title.getAttribute("innerHTML") + " != " + search);
+					return "NO_LINK";
+				}
+			}
+			
+			//If type = "Companies", check that the company name matches the search
+			else 
+			{
+				String searchTrimmed = trimWord(search);
+				String titleTrimmed = trimWord(title.getAttribute("innerHTML"));
+				if (!searchTrimmed.contains(titleTrimmed) && !titleTrimmed.contains(searchTrimmed)) 
+				{
+					System.out.println(searchTrimmed + " != " + titleTrimmed);
+					return "NO_LINK";
+				}
+			}
+			String href = firstResult.getAttribute("href");
 			return href;
 		}
 
-		catch (NoSuchElementException e)
+		catch (NoSuchElementException e) //there are no links on the page
 		{
 			return "NO_LINK";
 		}
 	}
-
-	// OPEN LINK, SCRAPE HTML
-	public void getData(String link, String company, String[] tags, ArrayList<ArrayList<String>> cmp)
+	
+	//Helper function for trimming words for easy comparison
+	private String trimWord(String s)
 	{
-		// Connect to LinkedIn Company Page
-		driver.get(link);
+		return s.trim().toLowerCase().replaceAll("\u00A0", ""); // "\u00A0" is a non-trimmable character, so I manually replace it here just in case
+	}
 
-		// Check if this is the right company page
+	/*
+	 * REQUIRES: link is either valid or "NO_LINK", tags are valid HTML tags
+	 * MODIFIES: cmp
+	 * EFFECTS:  This method gets the data requested by the tags array and adds it to cmp
+	 */
+	public void getData(String link, String company, String type, String[] tags, ArrayList<ArrayList<String>> cmp)
+	{
+		// Connect to LinkedIn Page
 		try
 		{
-			if (!driver.findElement(By.cssSelector("h1[class*='org-top-card-module__name']")).getAttribute("innerHTML")
-					.toLowerCase().trim().contains(company.toLowerCase().trim()))
+		driver.get(link);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		// Check if the page is loading
+		try
+		{
+			if(type == "Companies")
 			{
-				System.out.println("Wrong company from link");
-				for (int i = 0; i < tags.length; i++)
-				{
-					cmp.get(i).add(" ");
-				}
-				return;
+				driver.findElement(By.cssSelector("h1[class*='org-top-card-module__name']"));
+			}
+			else
+			{
+				driver.findElement(By.cssSelector("h1[class*='pv-top-card-section__name']"));
 			}
 		} 
 		catch (NoSuchElementException e)
 		{
-			System.out.println("Page Not Loading Correctly");
+			System.out.println(company + " PAGE NOT LOADING CORRECTLY");
 			for (int i = 0; i < tags.length; i++)
 			{
 				cmp.get(i).add(" ");
@@ -104,21 +159,30 @@ public class LinkedIn extends WebPage
 			return;
 		}
 
-		// Get Data, Sort into ArrayList
+		// Get Data, sort into cmp
 		WebElement e1;
 		for (int i = 0; i < tags.length; i++)
 		{
 			try
 			{
 				e1 = driver.findElement(By.cssSelector(tags[i]));
-				System.out.println(tags[i] + " found");
-				cmp.get(i).add(e1.getAttribute("innerHTML").trim());
+				
+				//profile picture link is a little different than most tags because it gets the "src" attribute and not the "innerHTML" attribute
+				if(tags[i].equals("img.pv-top-card-section__image"))
+				{
+					cmp.get(i).add(e1.getAttribute("src").trim());
+				}
+				
+				else
+				{
+					cmp.get(i).add(e1.getAttribute("innerHTML").trim());
+				}
 			}
 
 			// LinkedIn Page doesn't contain that tag
 			catch (NoSuchElementException e)
 			{
-				System.out.println(tags[i] + " not found");
+				System.out.println(company+" "+tags[i] + " not found");
 				cmp.get(i).add(" ");
 			}
 		}

@@ -9,11 +9,15 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+/*
+ * Description: This class sets the UI for the "PickSite" window
+ * 
+ * Author: Jaret Stillman (jrsstill@umich.edu)
+ */
+
 public class PickSite extends Windows
 {
-	/**
-	 * Create the application.
-	 */
+	
 	public PickSite()
 	{
 		
@@ -42,6 +46,7 @@ public class PickSite extends Windows
 		panel.add(lblPeopleOrCompanies);
 		
 		JButton btn1 = new JButton("Next >>>");
+		
 		btn1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) 
 			{
@@ -50,8 +55,11 @@ public class PickSite extends Windows
 				next = "Login";
 			}
 		});
+		
 		btn1.setFont(new Font("Arial", Font.PLAIN, 25));
 		btn1.setBounds(965, 460, 180, 45);
 		panel.add(btn1);
+		
+		addBackButton("Start");
 	}
 }

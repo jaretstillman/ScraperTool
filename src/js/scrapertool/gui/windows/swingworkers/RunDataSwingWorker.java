@@ -4,6 +4,12 @@ import java.util.List;
 
 import javax.swing.SwingWorker;
 
+/*
+ * Description: SwingWorker with public "publish" function so that Main functions can access it
+ * 
+ * Author: Jaret Stillman (jrsstill@umich.edu)
+ */
+
 public class RunDataSwingWorker<T,V> extends SwingWorker<T,V>
 {	
 	public void pub(V s)

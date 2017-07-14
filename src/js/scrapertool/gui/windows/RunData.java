@@ -1,7 +1,6 @@
 package js.scrapertool.gui.windows;
 
 import java.awt.Color;
-
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.TextArea;
@@ -12,8 +11,14 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
-import js.scrapertool.main.Main;
 import js.scrapertool.gui.windows.swingworkers.RunDataSwingWorker;
+import js.scrapertool.main.Main;
+
+/*
+ * Description: This class sets the UI for the "RunData" window
+ * 
+ * Author: Jaret Stillman (jrsstill@umich.edu)
+ */
 
 public class RunData extends Windows
 {
@@ -30,6 +35,8 @@ public class RunData extends Windows
 		textArea.setForeground(Color.BLACK);
 		textArea.setBackground(SystemColor.menu);
 		textArea.setBounds(130, 100, 940, 350);
+		textArea.setFont(new Font("Arial",Font.PLAIN,15));
+
 		panel.add(textArea);
 		
 		JButton btn1 = new JButton("DISPLAY RESULTS");
@@ -56,7 +63,10 @@ public class RunData extends Windows
 			@Override
 			protected void done()
 			{
+				lbl1.setText("DONE!");
+				lbl1.setForeground(Color.GREEN);
 				btn1.setForeground(Color.GREEN);
+				
 				btn1.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent arg0)
@@ -64,9 +74,20 @@ public class RunData extends Windows
 						next = "Display";
 					}
 				});
-			}
+			}	
+			
 		};
 		
 		worker.execute();
+		
+		addBackButton("PickData").addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				worker.cancel(true);
+			}
+			
+		});;
 	}
 }
