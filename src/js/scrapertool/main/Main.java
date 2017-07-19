@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import js.scrapertool.exceptions.InvalidCredentialsException;
 import js.scrapertool.gui.windows.swingworkers.RunDataSwingWorker;
+import js.scrapertool.webpages.Crunchbase;
 import js.scrapertool.webpages.LinkedIn;
 import js.scrapertool.webpages.WebPage;
 
@@ -37,7 +38,7 @@ public class Main
 				wp = new LinkedIn();
 				break;
 			case "Crunchbase":
-				//wp = new Crunchbase();
+				wp = new Crunchbase();
 				break;
 			default:
 				System.out.println("Non-existent site");
@@ -71,15 +72,8 @@ public class Main
 	 */
 	public void getData(String site, String type, String[] tags, RunDataSwingWorker<Boolean, String> sw)
 	{
-		
-		//Convert tags to HTML with a TagMap
-		TagMap tm = new TagMap(site,type);
-		String[] convertedTags = new String[tags.length];
-		for(int i=0; i<tags.length; i++)
-		{
-			convertedTags[i] = tm.convert(tags[i]);
-		}
-		
+		//Allow sw.process() to get through publish queue
+		wp.wait(.5);
 		//Get link for item, store data in wp, publish to sw 
 		for (String item : items) 
 		{
@@ -91,27 +85,15 @@ public class Main
 				System.out.println(item + " WRONG " + t + " FROM LINK");
 				for(int i=0; i<tags.length; i++)
 				{
-					cmp.get(i).add(" ");
+					cmp.get(i).add("-");
 				}
 			}
 			else 
 			{
 				sw.pub(link+"\n");
-				wp.getData(link, item, type, convertedTags, cmp);
+				wp.getData(link, site, item, type, tags, cmp);
 			}
 			sw.pub("Added\n\n");
-			
-			
-			//Allow sw.process() to get through publish queue
-			try
-			{
-				Thread.sleep(60);
-			}
-			catch(InterruptedException e)
-			{
-				e.printStackTrace();
-				System.exit(0);
-			}
 			
 		}
 	}
@@ -162,7 +144,19 @@ public class Main
 		result+= type + " Names: \n\n";
 		for(String item : items)
 		{
-			result += item + "\n";
+			//Need to print name of company multiple time for funding rounds
+			if(type.equals("Funding Rounds"))
+			{
+				Crunchbase c = (Crunchbase) wp;
+				for(String s: c.getRoundsList())
+				{
+					result += s + "\n";
+				}
+			}
+			else
+			{
+				result += item + "\n";
+			}
 		}
 		result+="\n";
 		for(int i=0; i<tags.length; i++)

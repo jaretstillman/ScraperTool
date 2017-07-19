@@ -28,14 +28,14 @@ public class Start extends Windows
 		lbl2.setBounds(350, 229, 500, 50);
 		panel.add(lbl2);
 		
-		JLabel lbl3 = new JLabel("Version 2.0");
+		JLabel lbl3 = new JLabel("Version 3.0");
 		lbl3.setFont(new Font("Arial", Font.PLAIN, 21));
 		lbl3.setBounds(1070, 535, 119, 26);
 		panel.add(lbl3);
 		
-		JLabel lbl4 = new JLabel("All Data from LinkedIn");
+		JLabel lbl4 = new JLabel("All Data from LinkedIn and Crunchbase");
 		lbl4.setFont(new Font("Arial", Font.PLAIN, 21));
-		lbl4.setBounds(974, 522, 208, 16);
+		lbl4.setBounds(815, 518, 400, 16);
 		panel.add(lbl4);
 		
 		JButton btn1 = new JButton("PRESS TO START");

@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 
 /*
  * Description: This class sets the UI for the "PickData" window
@@ -43,7 +44,9 @@ public class PickData extends Windows
 		list.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		list.setFont(new Font("Arial", Font.PLAIN, 20));
 		list.setBounds(300, 150,600, 300);
-		panel.add(list);
+		JScrollPane p = new JScrollPane(list);
+		p.setBounds(300,150,600,300);
+		panel.add(p);	
 		
 		JButton btn1 = new JButton("RUN");
 		btn1.setFont(new Font("Arial", Font.PLAIN, 25));
@@ -70,6 +73,7 @@ public class PickData extends Windows
 		addBackButton("Import");
 	}
 
+	//Helper function for putting options into the second comboBox
 	private void getTagOptions(String site, String type, DefaultListModel<String> tagOptions)
 	{
 		switch(site)
@@ -95,15 +99,55 @@ public class PickData extends Windows
 						tagOptions.addElement("Profile Picture Link");
 						break;
 				}
+				break;
 			case "Crunchbase":
 				switch(type)
 				{
 					case "Companies":
-						tagOptions.addElement("");
+						tagOptions.addElement("Company Logo Link");
+						tagOptions.addElement("Number of Investors");
+						tagOptions.addElement("Investor Names (First 15 Alphabetically)");
+						tagOptions.addElement("Total Equity Funding");
+						tagOptions.addElement("Founder(s)");
+						tagOptions.addElement("Headquarters");
+						tagOptions.addElement("Short Description");
+						tagOptions.addElement("Long Description");
+						tagOptions.addElement("Website");
+						tagOptions.addElement("Twitter");
+						tagOptions.addElement("LinkedIn");
+						tagOptions.addElement("Facebook");
+						tagOptions.addElement("Date Founded");
+						tagOptions.addElement("Employee Number");
+						tagOptions.addElement("Contact Email");
+						tagOptions.addElement("Contact Phone Number");
 						break;
 					case "People":
+						tagOptions.addElement("Primary Title");
+						tagOptions.addElement("Company");
+						tagOptions.addElement("Number of Investments");
+						tagOptions.addElement("Number of Companies Invested In");
+						tagOptions.addElement("Companies Invested In (Most Recent 40)");
+						tagOptions.addElement("Personal Website");
+						tagOptions.addElement("Birthdate");
+						tagOptions.addElement("Location");
+						tagOptions.addElement("Twitter");
+						tagOptions.addElement("LinkedIn");
+						tagOptions.addElement("Facebook");
+						tagOptions.addElement("Details");
+						break;
+					
+					case "Funding Rounds":
+						tagOptions.addElement("Funding Round Name");
+						tagOptions.addElement("Funding Round Link");
+						tagOptions.addElement("Funding Round Amount");
+						tagOptions.addElement("Funding Round Name");
+						tagOptions.addElement("Funding Round Date");
+						tagOptions.addElement("Funding Round Lead");
+						tagOptions.addElement("Funding Round Valuation");
+						tagOptions.addElement("Funding Round Investor Number");
 						break;
 				}
+				break;
 		}
 					
 	}

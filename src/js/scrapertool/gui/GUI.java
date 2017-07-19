@@ -23,13 +23,14 @@ import js.scrapertool.gui.windows.Import;
 /*
 * ScraperTool .main() Class
 * Description: This class initiates the GUI and manages the entire app
-* External Libraries/Resources used: Selenium/PhantomJS, WindowBuilder
-* Data: public from LinkedIn
+* External Libraries/Resources used: Selenium/PhantomJS, WindowBuilder, JSoup
+* Data: public from LinkedIn and Crunchbase
 * 
 * Author: Jaret Stillman (jrsstill@umich.edu)
-* Version: 2.0
-* Date: 7/14/17
+* Version: 3.0
+* Date: 7/19/17
 */
+
 public class GUI extends Frame
 {
 	private static final long serialVersionUID = 1L;
@@ -53,7 +54,7 @@ public class GUI extends Frame
 	{
 		main = new Main();
 		
-		setTitle("ScraperTool v2.0 (data provided by LinkedIn)");
+		setTitle("ScraperTool v3.0 (data provided by LinkedIn & Crunchbase)");
 		setResizable(false);
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout());
@@ -90,7 +91,7 @@ public class GUI extends Frame
 				currentWindow = new PickSite();
 				break;
 			case "Login":
-				currentWindow = new Login(site,main,this);
+				currentWindow = new Login(site,main);
 				break;
 			case "Import":
 				currentWindow = new Import(main,type);

@@ -22,6 +22,7 @@ public class Display extends Windows
 		TextArea textArea = new TextArea();
 		textArea.setText(main.print(tags,type));
 		textArea.setBounds(47, 58, 1047, 360);
+		textArea.setFont(new Font("Arial",Font.PLAIN,18));
 		panel.add(textArea);
 		
 		JButton btn1 = new JButton("RESET");
