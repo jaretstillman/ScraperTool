@@ -2,7 +2,6 @@ package js.scrapertool.gui.windows;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -33,8 +32,29 @@ public class Login extends Windows
 	private JTextField textField;
 	private JPasswordField textField2;
 	
-	public Login(String site, Main main, Frame frame)
+	public Login(String site, Main main)
 	{	
+		if(site.equals("Crunchbase"))
+		{
+			try 
+			{
+				main.login(site, "", "");
+			}
+			catch (InvalidCredentialsException e)
+			{
+				e.printStackTrace();
+				System.exit(0);
+			}
+			next = "Import";
+		}
+		else
+		{
+			init(site,main);
+		}
+	}
+	
+	private void init(String site, Main main)
+	{
 		JLabel lbl1 = new JLabel("Log In to " + site);
 		lbl1.setFont(new Font("Arial", Font.PLAIN, 40));
 		lbl1.setBounds(444, 90, 339, 55);
@@ -119,65 +139,67 @@ public class Login extends Windows
 		btn1.setFont(new Font("Arial", Font.PLAIN, 20));
 		btn1.setBounds(500, 380, 200, 67);
 		
+		
+		SwingWorker<Boolean, String> worker = new SwingWorker<Boolean,String>()
+		{
+			@Override
+			protected Boolean doInBackground() throws Exception
+			{
+				try 
+				{
+					publish("Logging in to " + site+ "...");
+					main.login(site, info.get(0), info.get(1));
+				}
+				catch (InvalidCredentialsException e1) 
+				{
+					return false;
+				}
+				return true;
+			}
+			
+			@Override
+			protected void process(List<String> stuff)
+			{
+				lbl4.setText(stuff.get(0));
+				lbl4.setForeground(Color.RED);
+			}
+			
+			@Override
+			protected void done()
+			{
+				try 
+				{
+					if(get())
+					{
+						lbl4.setText("Log-In for " + info.get(0) + "Successful!");
+						lbl4.setForeground(Color.GREEN);
+						//JOptionPane.showMessageDialog(panel, "Log in for user " + info.get(0) + " successful!");
+						next = "Import";
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(panel, "Invalid Credentials");
+						next = "Login";
+					}
+				}
+				catch (InterruptedException | ExecutionException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			
+		};
+		
 		btn1.addActionListener(new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent arg0) {
 				
-				
 				info.add(textField.getText());
 				info.add(String.valueOf(textField2.getPassword()));
-				
-				SwingWorker<Boolean, String> worker = new SwingWorker<Boolean,String>()
-				{
-					@Override
-					protected Boolean doInBackground() throws Exception
-					{
-						try 
-						{
-							publish("Logging in to " + site+ "...");
-							main.login(site, info.get(0), info.get(1));
-						}
-						catch (InvalidCredentialsException e1) 
-						{
-							return false;
-						}
-						return true;
-					}
-					
-					@Override
-					protected void process(List<String> stuff)
-					{
-						lbl4.setText(stuff.get(0));
-						lbl4.setForeground(Color.RED);
-					}
-					
-					@Override
-					protected void done()
-					{
-						try 
-						{
-							if(get())
-							{
-								lbl4.setText("Log-In for " + info.get(0) + "Successful!");
-								lbl4.setForeground(Color.GREEN);
-								//JOptionPane.showMessageDialog(panel, "Log in for user " + info.get(0) + " successful!");
-								next = "Import";
-							}
-							else
-							{
-								JOptionPane.showMessageDialog(panel, "Invalid Credentials");
-								next = "Login";
-							}
-						}
-						catch (InterruptedException | ExecutionException e)
-						{
-							e.printStackTrace();
-						}
-					}
-					
-				};
 				worker.execute();
-			}});
+			}
+		});
+		
 		panel.add(btn1);
 		
 		textField2.addKeyListener(new KeyAdapter(){
@@ -190,8 +212,16 @@ public class Login extends Windows
 			}
 		});
 		
-		addBackButton("PickSite");
-		
+		addBackButton("PickSite").addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				//still needs work
+				worker.cancel(true);
+			}
+			
+		});
 	}
 
 }

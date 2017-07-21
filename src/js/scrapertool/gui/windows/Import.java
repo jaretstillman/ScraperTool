@@ -37,27 +37,29 @@ public class Import extends Windows
 	private int numItems=1;
 	public Import(Main main, String type)
 	{
-		ArrayList<JTextField> companies = new ArrayList<JTextField>();
+		ArrayList<JTextField> items = new ArrayList<JTextField>();
 		JButton btn2 = new JButton("IMPORT");
+		String t = type.equals("People") ? "Person" : "Company";
+		
 		
 		btn2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) 
 			{
 				if(info.isEmpty())
 				{
-					//Opting to use companies list
+					//Opting to use items list
 					if(!textField.getText().trim().equals(""))
 					{
 						for(int i=0; i<numItems; i++)
 						{
-							info.add(companies.get(i).getText());
+							info.add(items.get(i).getText());
 						}
 						main.setItems(info);
 						next = "PickData";
 					}
 					else
 					{
-						JOptionPane.showMessageDialog(panel, "Please import a list of companies, or add companies manually");
+						JOptionPane.showMessageDialog(panel, "Please import a list of " + type.toLowerCase() +", or add " + t.toLowerCase() + " manually");
 					}
 				}
 				
@@ -89,7 +91,7 @@ public class Import extends Windows
 		lbl1.setFont(new Font("Arial", Font.PLAIN, 50));
 		panel.add(lbl1);
 		
-		JLabel lblEnterAList = new JLabel("ENTER A LIST OF "+ type.toUpperCase() + " NAMES");
+		JLabel lblEnterAList = new JLabel("ENTER A LIST OF "+ t.toUpperCase() + " NAMES");
 		lblEnterAList.setBounds(652, 60, 530, 39);
 		lblEnterAList.setFont(new Font("Arial", Font.PLAIN, 30));
 		panel.add(lblEnterAList);
@@ -108,7 +110,6 @@ public class Import extends Windows
 		sp.setBounds(679,125,480,311);		
 		panel.add(sp);
 		
-		String t = type=="Companies" ? "Company" : "Person";
 		JLabel promptText = new JLabel(t + " Name: ");
 		promptText.setBounds(x0, y0, 152, 30);
 		promptText.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -117,7 +118,7 @@ public class Import extends Windows
 		p.add(promptText);
 
 		textField = new JTextField();
-		companies.add(textField);
+		items.add(textField);
 		
 		textField.getDocument().addDocumentListener(new DocumentListener(){
 			@Override
@@ -152,9 +153,9 @@ public class Import extends Windows
 			{
 				if(e.getKeyCode()==KeyEvent.VK_TAB)
 				{
-					if(companies.indexOf(textField)!=companies.size()-1)
+					if(items.indexOf(textField)!=items.size()-1)
 					{
-					companies.get(companies.indexOf(textField)+1).grabFocus();
+						items.get(items.indexOf(textField)+1).grabFocus();
 					}
 				}
 			}
@@ -167,7 +168,7 @@ public class Import extends Windows
 		{
 			public void actionPerformed(ActionEvent e) 
 			{
-				createLabelPrompt(type,x0,y0,x1,p,companies,plus);	
+				createLabelPrompt(type,x0,y0,x1,p,items,plus);	
 			}
 		});
 		
@@ -191,7 +192,7 @@ public class Import extends Windows
 			public void actionPerformed(ActionEvent arg0)
 			{
 				JOptionPane.showMessageDialog(panel,
-						"Select a CSV File\n\nFormat:\n\nCompany, InfoA, InfoB... (headers)\nCompany_name1, info1a, info1b...\nCompany_name2, info2a, info2b...\n\nNote: for best results, get rid of \nUnnecessary characters (i.e. inc., ltd., etc.)");
+						"Select a CSV File\n\nFormat:\n\n" + t + ", InfoA, InfoB... (headers)\n" + t +"_name1, info1a, info1b...\n" + t + ", info2a, info2b...\n\nNote: for best results, get rid of \nUnnecessary characters (i.e. inc., ltd., etc.)");
 				
 				JFileChooser fc = new JFileChooser();
 				FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -208,23 +209,23 @@ public class Import extends Windows
 					}
 					else
 					{
-					btn2.setForeground(Color.GREEN);
-					lbl4.setText("File selected: " + fc.getSelectedFile().getName());
-					lbl4.setBounds(50,355,600,45);
+						btn2.setForeground(Color.GREEN);
+						lbl4.setText("File selected: " + fc.getSelectedFile().getName());
+						lbl4.setBounds(50,355,600,45);
 					}
 				}
 			}
 		});
 		panel.add(btn1);
 		
-		addBackButton("Login");
+		addBackButton("PickSite");
 	}
 	
-	private void createLabelPrompt(String type,int x0, int y0, int x1, JPanel p,ArrayList<JTextField> companies, JButton plus)
+	private void createLabelPrompt(String type,int x0, int y0, int x1, JPanel p,ArrayList<JTextField> items, JButton plus)
 	{
 		numItems++;
 		
-		String t = type=="Companies" ? "Company" : "Person";
+		String t = type.equals("People") ? "Person" : "Company";
 		JLabel promptText = new JLabel(t+" Name: ");
 		promptText.setBounds(x0, 35*(numItems-1)+y0, 152, 30);
 		promptText.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -237,16 +238,16 @@ public class Import extends Windows
 		textField.setFont(new Font("Arial", Font.PLAIN, 20));
 		p.add(textField);
 		textField.setColumns(10);
-		companies.add(textField);
+		items.add(textField);
 		textField.setFocusTraversalKeysEnabled(false);
 		textField.addKeyListener(new KeyAdapter(){
 			public void keyPressed(KeyEvent e)
 			{
 				if(e.getKeyCode()==KeyEvent.VK_TAB)
 				{
-					if(companies.indexOf(textField)!=companies.size()-1)
+					if(items.indexOf(textField)!=items.size()-1)
 					{
-					companies.get(companies.indexOf(textField)+1).grabFocus();
+					items.get(items.indexOf(textField)+1).grabFocus();
 					}
 				}
 			}

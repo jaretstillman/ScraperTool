@@ -1,21 +1,33 @@
 package js.scrapertool.webpages;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import js.scrapertool.exceptions.InvalidCredentialsException;
+import js.scrapertool.main.TagMap;
 
 /*
  * Description: This class defines custom methods for the LinkedIn scraper module
- * 
+ * Note: LinkedIn is significantly slower than Crunchbase because JSoup is a lot faster than Selenium, but LinkedIn wouldn't work with JSoup
  * Author: Jaret Stillman (jrsstill@umich.edu)
  */
 
 public class LinkedIn extends WebPage
 {
-
+	private PhantomJSDriver driver;
+	
 	/*
 	 * Logs in to LinkedIn 
 	 * REQUIRES: e and p are a valid email and password for LinkedIn, respectively 
@@ -24,10 +36,21 @@ public class LinkedIn extends WebPage
 	 */
 	public void login(String e, String p) throws InvalidCredentialsException
 	{
+		initDriver();
 		String url = "https://www.linkedin.com";
 		
 		// Go to login page, enter email and password
+		
+		try
+		{
 		driver.get(url);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			System.exit(0);
+		}
+		
 		WebElement email = driver.findElement(By.cssSelector("input[id='login-email']"));
 		WebElement password = driver.findElement(By.cssSelector("input[id='login-password']"));
 		email.sendKeys(e);
@@ -58,7 +81,7 @@ public class LinkedIn extends WebPage
 		try
 		{
 			// Edit names that don't work in search
-			search.replaceAll(" ", "%20").replaceAll(",", "%2C"); // can add more, but these are most common, easier to fill in the rest
+			search.replace(" ", "%20").replace(",", "%2C"); // can add more, but these are most common, easier to fill in the rest
 			
 			try
 			{
@@ -73,7 +96,7 @@ public class LinkedIn extends WebPage
 			
 			//Check if we are getting the right page from a search
 			WebElement firstResult = driver.findElement(By.cssSelector("a[data-control-name*='search_srp_result']"));
-			WebElement title = type=="Companies" ? driver.findElement(By.cssSelector("h3[class*='search-result__title']")) :
+			WebElement title = type.equals("Companies") ? driver.findElement(By.cssSelector("h3[class*='search-result__title']")) :
 									driver.findElement(By.cssSelector("span[class*='name actor-name']"));
 			
 			//If type = "People", check that the last name matches the search
@@ -82,8 +105,6 @@ public class LinkedIn extends WebPage
 			{
 				String[] firstLast = new String[2];
 				firstLast = search.split("\\s",2); //split into first and last name
-				System.out.println(firstLast[0]);
-				System.out.println(firstLast[1]);
 				if(!trimWord(title.getAttribute("innerHTML")).contains(trimWord(firstLast[1])) && 
 						!trimWord(firstLast[1]).contains(title.getAttribute("innerHTML")))
 				{
@@ -120,16 +141,26 @@ public class LinkedIn extends WebPage
 	}
 
 	/*
-	 * REQUIRES: link is either valid or "NO_LINK", tags are valid HTML tags
+	 * REQUIRES: link is valid, tags are valid HTML tags, site and type are valid, cmp is initialized
 	 * MODIFIES: cmp
 	 * EFFECTS:  This method gets the data requested by the tags array and adds it to cmp
 	 */
-	public void getData(String link, String company, String type, String[] tags, ArrayList<ArrayList<String>> cmp)
+	public void getData(String link, String site, String item, String type, String[] tags, ArrayList<ArrayList<String>> cmp)
 	{
+		//Convert tags to HTML with a TagMap
+		TagMap tm = new TagMap(site,type);
+		String[] convertedTags = new String[tags.length];
+		for(int i=0; i<tags.length; i++)
+		{
+			convertedTags[i] = tm.convert(tags[i]);
+		}	
+		
+		
+		
 		// Connect to LinkedIn Page
 		try
 		{
-		driver.get(link);
+			driver.get(link);
 		}
 		catch(Exception e)
 		{
@@ -140,7 +171,7 @@ public class LinkedIn extends WebPage
 		// Check if the page is loading
 		try
 		{
-			if(type == "Companies")
+			if(type.equals("Companies"))
 			{
 				driver.findElement(By.cssSelector("h1[class*='org-top-card-module__name']"));
 			}
@@ -151,41 +182,98 @@ public class LinkedIn extends WebPage
 		} 
 		catch (NoSuchElementException e)
 		{
-			System.out.println(company + " PAGE NOT LOADING CORRECTLY");
+			System.out.println(item + " PAGE NOT LOADING CORRECTLY");
 			for (int i = 0; i < tags.length; i++)
 			{
-				cmp.get(i).add(" ");
+				cmp.get(i).add("-");
 			}
 			return;
 		}
-
-		// Get Data, sort into cmp
+		
 		WebElement e1;
 		for (int i = 0; i < tags.length; i++)
 		{
 			try
 			{
-				e1 = driver.findElement(By.cssSelector(tags[i]));
-				
-				//profile picture link is a little different than most tags because it gets the "src" attribute and not the "innerHTML" attribute
-				if(tags[i].equals("img.pv-top-card-section__image"))
-				{
-					cmp.get(i).add(e1.getAttribute("src").trim());
-				}
-				
-				else
-				{
-					cmp.get(i).add(e1.getAttribute("innerHTML").trim());
-				}
+				e1 = driver.findElement(By.cssSelector(convertedTags[i]));
+				cmp.get(i).add(e1.getAttribute("innerHTML").trim());
 			}
 
 			// LinkedIn Page doesn't contain that tag
 			catch (NoSuchElementException e)
 			{
-				System.out.println(company+" "+tags[i] + " not found");
-				cmp.get(i).add(" ");
+				System.out.println(item +" "+tags[i] + " not found");
+				cmp.get(i).add("-");
 			}
 		}
 	}
 
+	//Helper function to initialize the PhantomJSDriver
+	private void initDriver()
+	{
+		
+		//Extract PhantomJs.exe
+		try
+		{
+			File f = new File ("./phantomjs.exe");
+			if (!f.exists()) 
+			{
+			  wait(2.0);
+			  InputStream in = getClass().getClassLoader().getResourceAsStream("js/scrapertool/resources/phantomjs.exe");
+			  OutputStream out = new FileOutputStream("./phantomjs.exe");
+			  IOUtils.copy(in, out);
+			}
+			System.setProperty("phantomjs.binary.path","./phantomjs.exe");
+		}
+		catch(Exception e)
+		{
+			try 
+			{
+				e.printStackTrace(new PrintStream("output.text"));
+			}
+			catch (FileNotFoundException e1) 
+			{
+				e1.printStackTrace();
+			}
+			System.exit(0);
+		}
+		
+		// Prevent Log Messages from showing up in console
+		DesiredCapabilities dcap = new DesiredCapabilities();
+		String[] phantomArgs = new String[] { "--webdriver-loglevel=NONE" };
+		dcap.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, phantomArgs);
+
+		/*System.setProperty("webdriver.chrome.driver","C:/Users/jrsti/Documents/Java/chromedriver.exe");
+		ChromeOptions cO = new ChromeOptions();
+		cO.addArguments("--headless");
+		cO.setBinary("C:/Users/jrsti/AppData/Local/Google/Chrome SxS/Application/chrome.exe");
+		driver = new ChromeDriver(cO); */
+		
+		//Initialize driver, try 3 times before crashing
+		int i=0;
+		while(i<3)
+		{
+			try
+			{
+				driver=new PhantomJSDriver(dcap);
+				break;
+			}
+			catch(Exception ex)
+			{
+				if(i>2)
+				{
+					try 
+					{
+						ex.printStackTrace(new PrintStream("output.txt"));
+					}
+					catch (FileNotFoundException e) 
+					{
+						e.printStackTrace();
+					} 
+					System.exit(0);
+				}
+				i++;
+			}
+		}
+	}
 }

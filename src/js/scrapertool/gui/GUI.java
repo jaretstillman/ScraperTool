@@ -1,15 +1,20 @@
 package js.scrapertool.gui;
 
 import java.awt.BorderLayout;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
+import js.scrapertool.gui.windows.Display;
+import js.scrapertool.gui.windows.Import;
 import js.scrapertool.gui.windows.Login;
 import js.scrapertool.gui.windows.PickData;
 import js.scrapertool.gui.windows.PickSite;
@@ -17,19 +22,18 @@ import js.scrapertool.gui.windows.RunData;
 import js.scrapertool.gui.windows.Start;
 import js.scrapertool.gui.windows.Windows;
 import js.scrapertool.main.Main;
-import js.scrapertool.gui.windows.Display;
-import js.scrapertool.gui.windows.Import;
 
 /*
 * ScraperTool .main() Class
 * Description: This class initiates the GUI and manages the entire app
-* External Libraries/Resources used: Selenium/PhantomJS, WindowBuilder
-* Data: public from LinkedIn
+* External Libraries/Resources used: Selenium/PhantomJS, WindowBuilder, JSoup
+* Data: public from LinkedIn and Crunchbase
 * 
 * Author: Jaret Stillman (jrsstill@umich.edu)
-* Version: 2.0
-* Date: 7/14/17
+* Version: 3.0
+* Date: 7/19/17
 */
+
 public class GUI extends Frame
 {
 	private static final long serialVersionUID = 1L;
@@ -52,8 +56,21 @@ public class GUI extends Frame
 	public GUI()
 	{
 		main = new Main();
+		PrintStream out;
+		try 
+		{
+			File f = new File("output.txt");
+			f.createNewFile(); // if file already exists will do nothing 
+			out = new PrintStream(new FileOutputStream(f));
+			System.setOut(out);
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+			System.exit(0);
+		}
 		
-		setTitle("ScraperTool v2.0 (data provided by LinkedIn)");
+		setTitle("ScraperTool v3.0 (data provided by LinkedIn & Crunchbase)");
 		setResizable(false);
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout());
@@ -90,7 +107,7 @@ public class GUI extends Frame
 				currentWindow = new PickSite();
 				break;
 			case "Login":
-				currentWindow = new Login(site,main,this);
+				currentWindow = new Login(site,main);
 				break;
 			case "Import":
 				currentWindow = new Import(main,type);
