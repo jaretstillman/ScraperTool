@@ -210,8 +210,7 @@ public class LinkedIn extends WebPage
 
 	//Helper function to initialize the PhantomJSDriver
 	private void initDriver()
-	{
-		
+	{	
 		//Extract PhantomJs.exe
 		try
 		{
@@ -242,7 +241,7 @@ public class LinkedIn extends WebPage
 		DesiredCapabilities dcap = new DesiredCapabilities();
 		String[] phantomArgs = new String[] { "--webdriver-loglevel=NONE" };
 		dcap.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, phantomArgs);
-
+	
 		/*System.setProperty("webdriver.chrome.driver","C:/Users/jrsti/Documents/Java/chromedriver.exe");
 		ChromeOptions cO = new ChromeOptions();
 		cO.addArguments("--headless");
@@ -272,8 +271,8 @@ public class LinkedIn extends WebPage
 					} 
 					System.exit(0);
 				}
-				i++;
 			}
 		}
 	}
 }
+
