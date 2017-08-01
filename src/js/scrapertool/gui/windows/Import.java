@@ -1,6 +1,7 @@
 package js.scrapertool.gui.windows;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -98,13 +99,15 @@ public class Import extends Windows
 		
 		JPanel p = new JPanel();
 		p.setBackground(Color.WHITE);
+		p.setPreferredSize(new Dimension(480,1200));
+		p.setMinimumSize(new Dimension(480,1200));
+		p.setMaximumSize(new Dimension(480,1200));
 		p.setLayout(null);
 		
 		int x0 = 12;
 		int y0 = 14;	
 		int x1 = 176;
 		
-		//Can't figure this out, something to do with preferredSize
 		JScrollPane sp = new JScrollPane(p,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		sp.setBackground(Color.WHITE);
 		sp.setBounds(679,125,480,311);		
@@ -201,6 +204,7 @@ public class Import extends Windows
 				int retVal = fc.showOpenDialog(panel);
 				if (retVal == JFileChooser.APPROVE_OPTION)
 				{
+					info.clear();
 					info.add(fc.getSelectedFile().getPath().replace('\\', '/'));
 					String extension = FilenameUtils.getExtension(info.get(0));
 					if(!extension.toLowerCase().equals("csv"))

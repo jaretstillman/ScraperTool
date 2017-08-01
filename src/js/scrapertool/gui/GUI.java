@@ -30,13 +30,14 @@ import js.scrapertool.main.Main;
 * Data: public from LinkedIn and Crunchbase
 * 
 * Author: Jaret Stillman (jrsstill@umich.edu)
-* Version: 3.0
+* Version: 3.1
 * Date: 7/19/17
 */
 
 public class GUI extends Frame
 {
 	private static final long serialVersionUID = 1L;
+	private String version = "3.1";
 	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
 	private String site;
@@ -70,7 +71,7 @@ public class GUI extends Frame
 			System.exit(0);
 		}
 		
-		setTitle("ScraperTool v3.0 (data provided by LinkedIn & Crunchbase)");
+		setTitle("ScraperTool v" + version + " (data provided by LinkedIn & Crunchbase)");
 		setResizable(false);
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout());
@@ -101,7 +102,7 @@ public class GUI extends Frame
 		switch (screen)
 		{
 			case "Start":
-				currentWindow = new Start();
+				currentWindow = new Start(version);
 				break;		
 			case "PickSite":
 				currentWindow = new PickSite();

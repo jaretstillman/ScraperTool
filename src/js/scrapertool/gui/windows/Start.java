@@ -16,7 +16,7 @@ import javax.swing.JLabel;
 public class Start extends Windows
 {
 
-	public Start()
+	public Start(String version)
 	{
 		JLabel lbl1 = new JLabel("ScraperTool");
 		lbl1.setFont(new Font("Arial", Font.BOLD, 95));
@@ -28,7 +28,7 @@ public class Start extends Windows
 		lbl2.setBounds(350, 229, 500, 50);
 		panel.add(lbl2);
 		
-		JLabel lbl3 = new JLabel("Version 3.0");
+		JLabel lbl3 = new JLabel("Version " + version);
 		lbl3.setFont(new Font("Arial", Font.PLAIN, 21));
 		lbl3.setBounds(1070, 535, 119, 26);
 		panel.add(lbl3);
